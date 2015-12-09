@@ -39,8 +39,8 @@ public class HillClimbing{
 
   static void computeNeighbors(int k){
     int n = cloud.size();
-    ArrayList<Neighbor> aux = new ArrayList<Neighbor>();
-    neighbors = new ArrayList<Integer[]>();
+    ArrayList<Neighbor> aux = new ArrayList<Neighbor>(n);
+    neighbors = new ArrayList<Integer[]>(n);
 
     for(int i = 0;i < n;++i){
       aux.clear();
@@ -64,7 +64,7 @@ public class HillClimbing{
 
   static void computeDensity(int k){
     int n = cloud.size();
-    density = new ArrayList<Double>();
+    density = new ArrayList<Double>(n);
 
     for(int i = 0;i < n;++i){
       double sum = 0;
@@ -77,55 +77,52 @@ public class HillClimbing{
     }
   }
 
+  static int getRoot(int v){
+    if(parent.get(v) == v) return v;
+    int r = getRoot(parent.get(v));
+    parent.set(v,r);
+    return r;
+  }
+
   static void computerForest(int k){
     int n = cloud.size();
-    parent = new ArrayList<Integer>();
+    ArrayList<Neighbor> aux = new ArrayList<Neighbor>(n);
+    parent = new ArrayList<Integer>(n);
 
     for(int i = 0;i < n;++i){
-      int par = i;
+      aux.add(new Neighbor(density.get(i),i));
+      parent.add(0);
+    }
+
+    Collections.sort(aux);
+
+    for(int i = 0;i < n;++i){
+      int cur = aux.get(n - 1 - i).index;
+      int par = cur;
 
       for(int j = 0;j < k;++j){
-        if(density.get( neighbors.get(i)[j] ) > density.get(par)){
-          par = neighbors.get(i)[j];
+        if(density.get( neighbors.get(cur)[j] ) > density.get(par)){
+          par = neighbors.get(cur)[j];
         }
       }
 
-      parent.add(par);
+      if(par == cur) parent.set(cur, cur);
+      else parent.set(cur, getRoot(par));
     }
-  }
-
-  static int getRoot(int v){
-    int r = v;
-
-    while(parent.get(r) != r){
-      r = parent.get(r);
-    }
-
-    return r;
   }
 
   static void computeLabels(){
     int n = cloud.size();
-    //Set<Integer> S = new TreeSet<Integer>();
-    label = new ArrayList<Integer>();
+    label = new ArrayList<Integer>(n);
 
     for(int i = 0;i < n;++i){
-      /*int r = i;
-
-      while(parent.get(r) != r){
-        r = parent.get(r);
-      }*/
-
-      //S.add(r);
       label.add(getRoot(i));
     }
-
-    //label = new ArrayList<Integer>(S);
   }
 
   static void computePersistence(int k, double tau){
     int n = cloud.size();
-    ArrayList<Neighbor> aux = new ArrayList<Neighbor>();
+    ArrayList<Neighbor> aux = new ArrayList<Neighbor>(n);
 
     for(int i = 0;i < n;++i){
       aux.add(new Neighbor(density.get(i),i));
@@ -134,17 +131,11 @@ public class HillClimbing{
     Collections.sort(aux);
 
     for(int i = 0;i < n;++i){
-      /*for(int j = 0;j < neighbors.get(i).size();++j){
-        int id = neighbors.get(i)[j];
-        aux.add(new Neighbor(density.get(id),id));
-      }
-
-      Collections.sort(aux);*/
       int cur = aux.get(n - 1 - i).index;
       int ei = getRoot(parent.get(cur));
 
       for(int j = 0;j < k;++j){
-        int id = neighbors.get(cur)[j];//aux.get(aux.size() - 1 - j).index;
+        int id = neighbors.get(cur)[j];
         int e = getRoot(id);
 
         if(e != ei && Math.min(density.get(ei),density.get(e)) < density.get(cur) + tau){

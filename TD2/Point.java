@@ -5,16 +5,13 @@ public class Point{
 
   Point(Scanner sc){
   	String line = sc.nextLine();
-    //System.out.println(line);
   	String[] tokens = line.replaceFirst("[ |\\t]+", "").split("[ |\\t]+");
   	int d = tokens.length;  // number of dimensions
   	coords = new double[d];
-    //System.out.println(d);
+
   	for (int i=0; i<d; i++){
-      //System.out.print(tokens[i] + ", ");
   		coords[i] = Double.parseDouble(tokens[i]);
     }
-    //System.out.println();
   }
 
   static double sqDist(Point p, Point q){

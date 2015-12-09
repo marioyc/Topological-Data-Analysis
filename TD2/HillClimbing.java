@@ -158,7 +158,17 @@ public class HillClimbing{
     }
   }
 
-  static void Clustering(String filename, int kDensity, int kGraph, double tau) throws FileNotFoundException{
+  static void ClusteringHillClimbing(String filename, int kDensity, int kGraph) throws FileNotFoundException{
+    readData(filename);
+    computeNeighbors(kDensity);
+    computeDensity(kDensity);
+    computerForest(kGraph);
+    computeLabels();
+
+    new ClusteringWindow(cloud, label, neighbors, kGraph);
+  }
+
+  static void ClusteringTomato(String filename, int kDensity, int kGraph, double tau) throws FileNotFoundException{
     readData(filename);
     computeNeighbors(kDensity);
     computeDensity(kDensity);
@@ -170,8 +180,12 @@ public class HillClimbing{
   }
 
   public static void main(String[] args) throws FileNotFoundException{
-    //Clustering("test.xy",10,5,0.35);
-    //Clustering("crater.xy",50,15,2);
-    Clustering("spirals.xy",100,30,0.03);
+    ClusteringHillClimbing("test.xy",10,5);
+    ClusteringHillClimbing("crater.xy",50,15);
+    //ClusteringHillClimbing("spirals.xy",100,30);
+
+    ClusteringTomato("test.xy",10,5,0.35);
+    ClusteringTomato("crater.xy",50,15,2);
+    //ClusteringTomato("spirals.xy",100,30,0.03);
   }
 }

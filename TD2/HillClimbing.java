@@ -2,20 +2,21 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-class Neighbor implements Comparable<Neighbor>{
+class PairValueIndex implements Comparable<PairValueIndex>{
   Double value;
   int index;
 
-  Neighbor(double value, int index){
+  PairValueIndex(double value, int index){
     this.value = value;
     this.index = index;
   }
 
-  public int compareTo(Neighbor p){
+  public int compareTo(PairValueIndex p){
     return value.compareTo(p.value);
   }
 }
@@ -24,8 +25,10 @@ public class HillClimbing{
   static ArrayList<Point> cloud;
   static ArrayList<Integer[]> neighbors;
   static ArrayList<Double> density;
+  static ArrayList<PairValueIndex> orderedDensity;
   static ArrayList<Integer> parent;
   static ArrayList<Integer> label;
+  static KdTree tree;
 
   static void readData(String filename) throws FileNotFoundException{
     cloud = new ArrayList<Point>();
@@ -39,15 +42,34 @@ public class HillClimbing{
 
   static void computeNeighbors(int k){
     int n = cloud.size();
-    ArrayList<Neighbor> aux = new ArrayList<Neighbor>(n);
     neighbors = new ArrayList<Integer[]>(n);
+    ArrayList<Integer> indexes = new ArrayList<Integer>(n);
+
+    for(int i = 0;i < n;++i)
+      indexes.add(i);
+
+    tree = new KdTree(cloud,indexes,0);
+    //PriorityQueue<Node> Q = new PriorityQueue<Node>();
+
+    for(int i = 0;i < 1;++i){
+      //Integer[] indexes = new Integer[k];
+      //int pos = 0;
+
+      //while(Q.size() > 0){
+      //  indexes[pos++] = Q.poll().index;
+      //}
+
+      neighbors.add(tree.KNN(cloud.get(i),k));
+    }
+
+    /*ArrayList<PairValueIndex> aux = new ArrayList<PairValueIndex>(n);
 
     for(int i = 0;i < n;++i){
       aux.clear();
 
       for(int j = 0;j < n;++j){
         if(j != i){
-          aux.add(new Neighbor(Point.sqDist(cloud.get(i),cloud.get(j)),j));
+          aux.add(new PairValueIndex(Point.sqDist(cloud.get(i),cloud.get(j)),j));
         }
       }
 
@@ -59,7 +81,7 @@ public class HillClimbing{
       }
 
       neighbors.add(indexes);
-    }
+    }*/
   }
 
   static void computeDensity(int k){
@@ -75,6 +97,14 @@ public class HillClimbing{
 
       density.add(1 / Math.sqrt(1.0 / k * sum));
     }
+
+    orderedDensity = new ArrayList<PairValueIndex>(n);
+
+    for(int i = 0;i < n;++i){
+      orderedDensity.add(new PairValueIndex(density.get(i),i));
+    }
+
+    Collections.sort(orderedDensity);
   }
 
   static int getRoot(int v){
@@ -86,18 +116,14 @@ public class HillClimbing{
 
   static void computerForest(int k){
     int n = cloud.size();
-    ArrayList<Neighbor> aux = new ArrayList<Neighbor>(n);
     parent = new ArrayList<Integer>(n);
 
     for(int i = 0;i < n;++i){
-      aux.add(new Neighbor(density.get(i),i));
       parent.add(0);
     }
 
-    Collections.sort(aux);
-
     for(int i = 0;i < n;++i){
-      int cur = aux.get(n - 1 - i).index;
+      int cur = orderedDensity.get(n - 1 - i).index;
       int par = cur;
 
       for(int j = 0;j < k;++j){
@@ -122,16 +148,9 @@ public class HillClimbing{
 
   static void computePersistence(int k, double tau){
     int n = cloud.size();
-    ArrayList<Neighbor> aux = new ArrayList<Neighbor>(n);
 
     for(int i = 0;i < n;++i){
-      aux.add(new Neighbor(density.get(i),i));
-    }
-
-    Collections.sort(aux);
-
-    for(int i = 0;i < n;++i){
-      int cur = aux.get(n - 1 - i).index;
+      int cur = orderedDensity.get(n - 1 - i).index;
       int ei = getRoot(parent.get(cur));
 
       for(int j = 0;j < k;++j){
@@ -171,12 +190,14 @@ public class HillClimbing{
   }
 
   public static void main(String[] args) throws FileNotFoundException{
+    //readData("test.xy");
+    //computeNeighbors(10);
     ClusteringHillClimbing("test.xy",10,5);
-    ClusteringHillClimbing("crater.xy",50,15);
+    //ClusteringHillClimbing("crater.xy",50,15);
     //ClusteringHillClimbing("spirals.xy",100,30);
 
-    ClusteringTomato("test.xy",10,5,0.35);
-    ClusteringTomato("crater.xy",50,15,2);
+    //ClusteringTomato("test.xy",10,5,0.35);
+    //ClusteringTomato("crater.xy",50,15,2);
     //ClusteringTomato("spirals.xy",100,30,0.03);
   }
 }

@@ -48,21 +48,15 @@ public class HillClimbing{
     for(int i = 0;i < n;++i)
       indexes.add(i);
 
-    tree = new KdTree(cloud,indexes,0,0);
-    //PriorityQueue<Node> Q = new PriorityQueue<Node>();
+    tree = new KdTree(cloud,indexes,0);
 
     for(int i = 0;i < n;++i){
-      //Integer[] indexes = new Integer[k];
-      //int pos = 0;
-
-      //while(Q.size() > 0){
-      //  indexes[pos++] = Q.poll().index;
-      //}
-
       neighbors.add(tree.KNN(cloud.get(i),i,k));
     }
 
-    /*ArrayList<PairValueIndex> aux = new ArrayList<PairValueIndex>(n);
+    /*neighbors.clear();
+
+    ArrayList<PairValueIndex> aux = new ArrayList<PairValueIndex>(n);
 
     for(int i = 0;i < n;++i){
       aux.clear();
@@ -74,13 +68,13 @@ public class HillClimbing{
       }
 
       Collections.sort(aux);
-      Integer[] indexes = new Integer[k];
+      Integer[] indexes2 = new Integer[k];
 
       for(int j = 0;j < k;++j){
-        indexes[j] = aux.get(j).index;
+        indexes2[j] = aux.get(j).index;
       }
 
-      neighbors.add(indexes);
+      neighbors.add(indexes2);
     }*/
   }
 
@@ -190,14 +184,12 @@ public class HillClimbing{
   }
 
   public static void main(String[] args) throws FileNotFoundException{
-    //readData("test.xy");
-    //computeNeighbors(10);
     ClusteringHillClimbing("test.xy",10,5);
     ClusteringHillClimbing("crater.xy",50,15);
-    //ClusteringHillClimbing("spirals.xy",100,30);
+    ClusteringHillClimbing("spirals.xy",100,30);
 
     ClusteringTomato("test.xy",10,5,0.35);
     ClusteringTomato("crater.xy",50,15,2);
-    //ClusteringTomato("spirals.xy",100,30,0.03);
+    ClusteringTomato("spirals.xy",100,30,0.03);
   }
 }

@@ -48,10 +48,10 @@ public class HillClimbing{
     for(int i = 0;i < n;++i)
       indexes.add(i);
 
-    tree = new KdTree(cloud,indexes,0);
+    tree = new KdTree(cloud,indexes,0,0);
     //PriorityQueue<Node> Q = new PriorityQueue<Node>();
 
-    for(int i = 0;i < 1;++i){
+    for(int i = 0;i < n;++i){
       //Integer[] indexes = new Integer[k];
       //int pos = 0;
 
@@ -59,7 +59,7 @@ public class HillClimbing{
       //  indexes[pos++] = Q.poll().index;
       //}
 
-      neighbors.add(tree.KNN(cloud.get(i),k));
+      neighbors.add(tree.KNN(cloud.get(i),i,k));
     }
 
     /*ArrayList<PairValueIndex> aux = new ArrayList<PairValueIndex>(n);
@@ -193,11 +193,11 @@ public class HillClimbing{
     //readData("test.xy");
     //computeNeighbors(10);
     ClusteringHillClimbing("test.xy",10,5);
-    //ClusteringHillClimbing("crater.xy",50,15);
+    ClusteringHillClimbing("crater.xy",50,15);
     //ClusteringHillClimbing("spirals.xy",100,30);
 
-    //ClusteringTomato("test.xy",10,5,0.35);
-    //ClusteringTomato("crater.xy",50,15,2);
+    ClusteringTomato("test.xy",10,5,0.35);
+    ClusteringTomato("crater.xy",50,15,2);
     //ClusteringTomato("spirals.xy",100,30,0.03);
   }
 }

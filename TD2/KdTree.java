@@ -16,12 +16,15 @@ public class KdTree{
   double minValue[],maxValue[];
   static int ITERATIONS = 5;
   KdTree lson = null,rson = null;
+  int id;
   //Node[] Q;
   //int nQ;
 
-  KdTree(ArrayList<Point> p, ArrayList<Integer> ind, int cur){
+  KdTree(ArrayList<Point> p, ArrayList<Integer> ind, int cur, int id){
     this.points = p;
     this.indexes = ind;
+    this.cur = cur;
+    this.id = id;
     int n = points.size(),d = points.get(0).coords.length;
 
     minValue = new double[d];
@@ -43,8 +46,8 @@ public class KdTree{
       //System.out.println("BuildKdTree n = " + n);
 
       if(n == 1){
-        points.add(points.get(0));
-        this.cur = cur;
+        //this.points.add(points.get(0));
+        //ind1.
       }else{
         double m = 0;
 
@@ -70,16 +73,21 @@ public class KdTree{
 
         //System.out.println(p1.size() + " " + p2.size());
 
-        if(!p1.isEmpty()) lson = new KdTree(p1,ind1,(cur + 1) % d);
-        if(!p2.isEmpty()) rson = new KdTree(p2,ind2,(cur + 1) % d);
+        if(!p1.isEmpty()) lson = new KdTree(p1,ind1,(cur + 1) % d,2 * id + 1);
+        if(!p2.isEmpty()) rson = new KdTree(p2,ind2,(cur + 1) % d,2 * id + 2);
+        int cont1 = p1.size() + p2.size(),cont2 = 0;
+        if(lson != null) cont2 += lson.points.size();
+        if(rson != null) cont2 += rson.points.size();
+        //System.out.println("id = " + id + ", points = " + points.size() + ", cont1 = " + cont1 + ", cont2 = " + cont2);
+        //if(cont1 != points.size() || cont2 != points.size()) System.out.println("!!!!");
       }
   }
 
-  Integer[] KNN(Point p, int k){
-    System.out.println("KNN");
+  Integer[] KNN(Point p, int index, int k){
+    //System.out.println("KNN, k = " + k);
     Node[] Q = new Node[k];
     MutableInteger nQ = new MutableInteger();
-    searchKNN(p,k,Q,nQ);
+    searchKNN(p,index,k,Q,nQ);
     Integer[] ret = new Integer[k];
 
     for(int i = 0;i < nQ.value;++i)
@@ -94,15 +102,19 @@ public class KdTree{
     return ret;
   }
 
-  void searchKNN(Point p, int k, Node[] Q, MutableInteger nQ){
+  void searchKNN(Point p, int index, int k, Node[] Q, MutableInteger nQ){
+    //System.out.println("id = " + id + ", points = " + points.size());
     if(nQ.value < k){
-      if(points.size() == 1){
-        System.out.println("Caso 1.1");
-        Q[nQ.value].p = points.get(0);
-        Q[nQ.value].index = indexes.get(0);
-        Q[nQ.value].distance = Point.sqDist(p,points.get(0));
+      //System.out.println("Caso 1");
+      if(points.size() == 1 && index != indexes.get(0)){
+        //System.out.println("1) Caso 1.1, k = " + k + ", nQ = " + nQ.value + ", points = " + points.size());
+        Q[nQ.value] = new Node(points.get(0), indexes.get(0), Point.sqDist(p,points.get(0)));
+        //Q[nQ.value].p = points.get(0);
+        //System.out.println("2) Caso 1.1, k = " + k + ", nQ = " + nQ.value);
+        //Q[nQ.value].index = indexes.get(0);
+        //Q[nQ.value].distance = Point.sqDist(p,points.get(0));
         ++nQ.value;
-        System.out.print(nQ.value + " ");
+        //System.out.print(nQ.value + " ");
         int pos = nQ.value - 1;
 
         while(pos > 0){
@@ -113,19 +125,25 @@ public class KdTree{
           }else break;
           --pos;
         }
-      }else{
-        System.out.println("Caso 1.2");
+      }else if(points.size() > 1){
+        //System.out.println("Caso 1.2");
         if(lson != null){
-          System.out.println("lson " + points.size() + " -> " + lson.points.size());
-          lson.searchKNN(p,k,Q,nQ);
+          //System.out.println("lson " + cur + ", " + points.size() + " -> " + lson.points.size() + " | " + id + " -> " + lson.id);
+          lson.searchKNN(p,index,k,Q,nQ);
         }
         if(rson != null){
-          System.out.println("rson " + points.size() + " -> " + rson.points.size());
-          rson.searchKNN(p,k,Q,nQ);
+          //System.out.println("rson " + cur + ", " + points.size() + " -> " + rson.points.size() + " | " + id + " -> " + rson.id);
+          rson.searchKNN(p,index,k,Q,nQ);
+        }
+        int cont = 0;
+        if(lson != null) cont += lson.points.size();
+        if(rson != null) cont += rson.points.size();
+        if(cont != points.size()){
+          System.out.println(id + " fails!! " + cont + " != " + points.size());
         }
       }
     }else if(points.size() == 1){
-      System.out.println("Caso 2");
+      //System.out.println("Caso 2");
       double distance = Point.sqDist(p,points.get(0));
       if(distance < Q[k - 1].distance){
         Q[k - 1].p = points.get(0);
@@ -144,7 +162,7 @@ public class KdTree{
         --pos;
       }
     }else{
-      System.out.println("Caso 3");
+      //System.out.println("Caso 3");
       int d = p.coords.length;
       double[] cmin = new double[d];
       double[] cmax = new double[d];
@@ -159,9 +177,9 @@ public class KdTree{
       }
 
       if(lson != null)
-        lson.searchKNN(p,k,Q,nQ);
+        lson.searchKNN(p,index,k,Q,nQ);
       if(rson != null)
-        rson.searchKNN(p,k,Q,nQ);
+        rson.searchKNN(p,index,k,Q,nQ);
     }
   }
 }

@@ -43,18 +43,6 @@ public class HillClimbing{
   static void computeNeighbors(int k){
     int n = cloud.size();
     neighbors = new ArrayList<Integer[]>(n);
-    ArrayList<Integer> indexes = new ArrayList<Integer>(n);
-
-    for(int i = 0;i < n;++i)
-      indexes.add(i);
-
-    tree = new KdTree(cloud,indexes,0);
-
-    for(int i = 0;i < n;++i){
-      neighbors.add(tree.KNN(cloud.get(i),i,k));
-    }
-
-    /*neighbors.clear();
 
     ArrayList<PairValueIndex> aux = new ArrayList<PairValueIndex>(n);
 
@@ -75,7 +63,22 @@ public class HillClimbing{
       }
 
       neighbors.add(indexes2);
-    }*/
+    }
+  }
+
+  static void computeNeighborsWithKdTree(int k){
+    int n = cloud.size();
+    neighbors = new ArrayList<Integer[]>(n);
+    ArrayList<Integer> indexes = new ArrayList<Integer>(n);
+
+    for(int i = 0;i < n;++i)
+      indexes.add(i);
+
+    tree = new KdTree(cloud,indexes,0);
+
+    for(int i = 0;i < n;++i){
+      neighbors.add(tree.KNN(cloud.get(i),i,k));
+    }
   }
 
   static void computeDensity(int k){
@@ -164,7 +167,8 @@ public class HillClimbing{
 
   static void ClusteringHillClimbing(String filename, int kDensity, int kGraph) throws FileNotFoundException{
     readData(filename);
-    computeNeighbors(kDensity);
+    //computeNeighbors(kDensity);
+    computeNeighborsWithKdTree(kDensity);
     computeDensity(kDensity);
     computerForest(kGraph);
     computeLabels();
@@ -174,7 +178,8 @@ public class HillClimbing{
 
   static void ClusteringTomato(String filename, int kDensity, int kGraph, double tau) throws FileNotFoundException{
     readData(filename);
-    computeNeighbors(kDensity);
+    //computeNeighbors(kDensity);
+    computeNeighborsWithKdTree(kDensity);
     computeDensity(kDensity);
     computerForest(kGraph);
     computePersistence(kGraph,tau);

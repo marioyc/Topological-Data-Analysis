@@ -69,33 +69,23 @@ public class KdTree{
   }
 
   Integer[] KNN(Point p, int index, int k){
-    Node[] Q = new Node[k];
+    PriorityQueue<Node> Q = new PriorityQueue<Node>(k + 1);
     MutableInteger nQ = new MutableInteger();
     searchKNN(p,index,k,Q,nQ);
 
     Integer[] ret = new Integer[k];
 
-    for(int i = 0;i < nQ.value;++i)
-      ret[i] = Q[i].index;
+    for(int i = 0;i < k;++i)
+      ret[k - 1 - i] = Q.poll().index;
 
     return ret;
   }
 
-  void searchKNN(Point p, int index, int k, Node[] Q, MutableInteger nQ){
+  void searchKNN(Point p, int index, int k, PriorityQueue<Node> Q, MutableInteger nQ){
     if(nQ.value < k){ // Queue has les than k elements
       if(points.size() == 1 && index != indexes.get(0)){ // leaf node
-        Q[nQ.value] = new Node(points.get(0), indexes.get(0), Point.sqDist(p,points.get(0)));
+        Q.add(new Node(points.get(0), indexes.get(0), Point.sqDist(p,points.get(0))));
         ++nQ.value;
-        int pos = nQ.value - 1;
-
-        while(pos > 0){
-          if(Q[pos].compareTo(Q[pos - 1]) == -1){
-            Node aux = Q[pos];
-            Q[pos] = Q[pos - 1];
-            Q[pos - 1] = aux;
-          }else break;
-          --pos;
-        }
       }else if(points.size() > 1){ // non-leaf node
         if(lson != null)
           lson.searchKNN(p,index,k,Q,nQ);
@@ -105,28 +95,16 @@ public class KdTree{
     }else if(points.size() == 1 && index != indexes.get(0)){ // leaf node
       double distance = Point.sqDist(p,points.get(0));
 
-      if(distance < Q[k - 1].distance){
-        Q[k - 1].p = points.get(0);
-        Q[k - 1].index = indexes.get(0);
-        Q[k - 1].distance = distance;
-      }
-
-      int pos = k - 1;
-
-      while(pos > 0){
-        if(Q[pos].compareTo(Q[pos - 1]) == -1){
-          Node aux = Q[pos];
-          Q[pos] = Q[pos - 1];
-          Q[pos - 1] = aux;
-        }else break;
-        --pos;
+      if(distance < Q.peek().distance){
+        Q.poll();
+        Q.add(new Node(points.get(0), indexes.get(0), distance));
       }
     }else if(points.size() > 1){ // non-leaf node
       int d = p.coords.length;
       double[] cmin = new double[d];
       double[] cmax = new double[d];
 
-      double r = Q[k - 1].distance;
+      double r = Q.peek().distance;
       // check intersection
       boolean intersects = true;
 

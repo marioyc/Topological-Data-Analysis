@@ -10,10 +10,6 @@ public class Node implements Comparable<Node>{
   }
 
   public int compareTo(Node x){
-    return distance.compareTo(x.distance);
+    return -distance.compareTo(x.distance);
   }
-
-  /*public int getIndex(){
-    return index;
-  }*/
 }
